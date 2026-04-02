@@ -1,7 +1,8 @@
 public class Philosopher implements Runnable {
 
-    Chopstick leftChopstick;
-    Chopstick rightChopstick;
+    // Reference to chopstick that the philosopher owns
+    private Chopstick leftChopstick;
+    private Chopstick rightChopstick;
 
     @Override
     public void run() {
