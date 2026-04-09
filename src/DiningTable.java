@@ -1,6 +1,8 @@
 /**
- * Main class of program, holds the philosophers who "eat", philosophizing, or are hungry at the table.
- *
+ * Coordinates the dining philosophers simulation.
+ * <p>
+ * The table creates the philosophers and chopsticks, starts each philosopher on
+ * a dedicated thread, and waits until every philosopher has completed all meals.
  */
 public class DiningTable {
 
@@ -11,6 +13,15 @@ public class DiningTable {
     private final Thread[] philosopherThreads;
     private int completedPhilosophers;
 
+    /**
+     * Creates a dining table and all participating philosophers.
+     * <p>
+     * Inputs are normalized so the simulation always has at least two
+     * philosophers and a non-negative meal count.
+     *
+     * @param philosopherCount the requested number of philosophers
+     * @param mealsPerPhilosopher the requested meals per philosopher
+     */
     public DiningTable(int philosopherCount, int mealsPerPhilosopher) {
         philosopherCount = Math.max(2, philosopherCount);
         mealsPerPhilosopher = Math.max(0, mealsPerPhilosopher);
@@ -35,6 +46,9 @@ public class DiningTable {
         }
     }
 
+    /**
+     * Starts all philosopher threads and waits for the simulation to finish.
+     */
     public void startDinner() {
         for (Thread philosopherThread : philosopherThreads) {
             philosopherThread.start();
@@ -42,6 +56,7 @@ public class DiningTable {
 
         synchronized (this) {
             try {
+                // Wait until every philosopher thread reports completion.
                 while (completedPhilosophers < philosopherThreads.length) {
                     wait();
                 }
@@ -49,6 +64,10 @@ public class DiningTable {
         }
     }
 
+    /**
+     * Records that a philosopher has completed execution and wakes waiting
+     * threads monitoring the table.
+     */
     private synchronized void philosopherFinished() {
         completedPhilosophers++;
 
@@ -59,10 +78,11 @@ public class DiningTable {
         }
     }
 
-    public Philosopher[] getPhilosophers() {
-        return philosophers.clone();
-    }
-
+    /**
+     * Runs the simulation using the default philosopher and meal counts.
+     *
+     * @param args command-line arguments, not used
+     */
     public static void main(String[] args) {
         DiningTable diningTable = new DiningTable(DEFAULT_PHILOSOPHER_COUNT, DEFAULT_MEALS_PER_PHILOSOPHER);
         diningTable.startDinner();

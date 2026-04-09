@@ -1,5 +1,11 @@
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Models a philosopher participating in the dining philosophers simulation.
+ * <p>
+ * Each philosopher alternates between philosophizing and eating for a fixed
+ * number of meals while sharing chopsticks with adjacent philosophers.
+ */
 public class Philosopher implements Runnable {
 
     private final int id;
@@ -8,6 +14,14 @@ public class Philosopher implements Runnable {
     private final int mealsToEat;
     private volatile PhilosopherState state = PhilosopherState.PHILOSOPHIZING;
 
+    /**
+     * Creates a philosopher with references to the chopsticks on both sides.
+     *
+     * @param id the philosopher identifier used for output
+     * @param leftChopstick the chopstick to the philosopher's left
+     * @param rightChopstick the chopstick to the philosopher's right
+     * @param mealsToEat the number of meals the philosopher should eat
+     */
     public Philosopher(int id, Chopstick leftChopstick, Chopstick rightChopstick, int mealsToEat) {
         this.id = id;
         this.leftChopstick = leftChopstick;
@@ -15,14 +29,9 @@ public class Philosopher implements Runnable {
         this.mealsToEat = mealsToEat;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public PhilosopherState getState() {
-        return state;
-    }
-
+    /**
+     * Runs the philosopher life cycle until all assigned meals have been eaten.
+     */
     @Override
     public void run() {
         for (int meal = 1; meal <= mealsToEat; meal++) {
@@ -33,16 +42,26 @@ public class Philosopher implements Runnable {
         System.out.printf("Philosopher %d leaves the table.%n", id);
     }
 
+    /**
+     * Simulates time spent thinking between meals.
+     */
     private void philosophize() {
         state = PhilosopherState.PHILOSOPHIZING;
         System.out.printf("Philosopher %d is philosophizing.%n", id);
         pause();
     }
 
+    /**
+     * Attempts to acquire both chopsticks, eat a meal, and then release the
+     * chopsticks in reverse order.
+     *
+     * @param mealNumber the meal currently being eaten
+     */
     private void eat(int mealNumber) {
         state = PhilosopherState.HUNGRY;
         System.out.printf("Philosopher %d is hungry.%n", id);
 
+        // Always pick up the lower-numbered chopstick first to prevent circular wait.
         Chopstick first = leftChopstick.getId() < rightChopstick.getId() ? leftChopstick : rightChopstick;
         Chopstick second = first == leftChopstick ? rightChopstick : leftChopstick;
 
@@ -67,6 +86,9 @@ public class Philosopher implements Runnable {
         }
     }
 
+    /**
+     * Pauses for a short random interval to vary the thread schedule.
+     */
     private void pause() {
         try {
             Thread.sleep(ThreadLocalRandom.current().nextInt(250, 750));

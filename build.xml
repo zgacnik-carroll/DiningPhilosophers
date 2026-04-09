@@ -1,17 +1,22 @@
+<!-- Ant build file for compiling and running the dining philosophers simulation. -->
 <project name="DiningPhilosophers" default="run" basedir=".">
+    <!-- Source location, build output directory, and Java entry point. -->
     <property name="src.dir" value="src"/>
     <property name="build.dir" value="build"/>
     <property name="main.class" value="DiningTable"/>
 
+    <!-- Removes generated build artifacts. -->
     <target name="clean">
         <delete dir="${build.dir}"/>
     </target>
 
+    <!-- Compiles all Java sources into the build directory. -->
     <target name="compile">
         <mkdir dir="${build.dir}"/>
         <javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false"/>
     </target>
 
+    <!-- Compiles the project and launches the main class. -->
     <target name="run" depends="compile">
         <java classname="${main.class}" classpath="${build.dir}" fork="true"/>
     </target>
