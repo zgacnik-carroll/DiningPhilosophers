@@ -1,0 +1,71 @@
+@startuml
+title Dining Philosophers Program Flow
+
+start
+:`DiningTable.main()` creates a `DiningTable`
+with 5 philosophers and 3 meals each;
+
+:Normalize inputs;
+:Create `Chopstick[]`;
+:Create `Philosopher[]`;
+:Create one `Thread` per philosopher;
+
+:`startDinner()`;
+:Start all philosopher threads;
+
+fork
+  group Philosopher Thread (`Philosopher.run()`)
+    repeat
+      :Set state to `PHILOSOPHIZING`;
+      :Print philosophizing message;
+      :Pause for a random time;
+
+      :Set state to `HUNGRY`;
+      :Choose lower-numbered chopstick first;
+
+      :`first.pickUp(this)`;
+      if (First chopstick owned?) then (yes)
+        :Wait until notified;
+      endif
+
+      :`second.pickUp(this)`;
+      if (Second chopstick owned?) then (yes)
+        :Wait until notified;
+      endif
+
+      :Set state to `EATING`;
+      :Print eating message;
+      :Pause for a random time;
+
+      :`second.putDown(this)`;
+      :Notify waiting philosophers;
+      :`first.putDown(this)`;
+      :Notify waiting philosophers;
+    repeat while (More meals remain?) is (yes)
+
+    :Print leaving-table message;
+    :Thread wrapper calls
+    `DiningTable.philosopherFinished()`;
+  end group
+fork again
+  :Other philosopher threads
+  run the same loop concurrently;
+end fork
+
+:Increment completed philosopher count;
+if (All philosopher threads finished?) then (yes)
+  :`notifyAll()` waiting table thread;
+else (no)
+  :`notify()` waiting table thread;
+endif
+
+:`startDinner()` stops waiting;
+stop
+
+note right
+Deadlock is avoided because each philosopher
+always acquires the lower-numbered chopstick first,
+which removes circular wait.
+end note
+
+@enduml
